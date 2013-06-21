@@ -12,6 +12,9 @@
 #include <type_traits>
 #include <iterator>
 
+namespace alnr 
+{
+
 #define RETURNS_AS_IS(...) -> decltype(__VA_ARGS__) { return (__VA_ARGS__); }
 #define RETURNS_DECAY(...) -> typename std::decay<decltype(__VA_ARGS__)>::type\
     { return (__VA_ARGS__); }
@@ -146,7 +149,8 @@ struct tuple_exec_ltr
     template<typename Arg, typename Tuple>
     static auto exec(Arg&& arg, Tuple&& tup)
     RETURNS_DECAY(
-        std::get<N>(std::forward<Tuple>(tup))(tuple_exec_ltr<N-1>::exec(std::forward<Arg>(arg), std::forward<Tuple>(tup)))
+        std::get<N>(std::forward<Tuple>(tup))(tuple_exec_ltr<N-1>::exec(
+            std::forward<Arg>(arg), std::forward<Tuple>(tup)))
     )
 };
 
@@ -166,7 +170,9 @@ struct tuple_exec_rtl
     template<typename Tuple, typename Arg, typename... Args>
     static auto exec(Tuple&& tup, Arg&& arg, Args&&... args)
     RETURNS_DECAY(
-        tuple_exec_rtl<N-1>::exec(std::forward<Tuple>(tup), std::get<N>(std::forward<Tuple>(tup))(std::forward<Arg>(arg), std::forward<Args>(args)...))
+        tuple_exec_rtl<N-1>::exec(std::forward<Tuple>(tup), std::get<N>(
+            std::forward<Tuple>(tup))(std::forward<Arg>(arg),
+            std::forward<Args>(args)...))
     )
 };
 
@@ -176,7 +182,8 @@ struct tuple_exec_rtl<0>
     template<typename Tuple, typename Arg, typename... Args>
     static auto exec(Tuple&& tup, Arg&& arg, Args&&... args)
     RETURNS_DECAY(
-        std::get<0>(std::forward<Tuple>(tup))(std::forward<Arg>(arg), std::forward<Args>(args)...)
+        std::get<0>(std::forward<Tuple>(tup))(std::forward<Arg>(arg),
+        std::forward<Args>(args)...)
     )
 };
 
@@ -194,7 +201,8 @@ struct composed
     template<typename Arg, typename... Args>
     auto operator()(Arg&& arg, Args&&... args)
     RETURNS_DECAY(
-        detail::tuple_exec_rtl<sizeof...(Fs)-1>::exec(fs, std::forward<Arg>(arg), std::forward<Args>(args)...)
+        detail::tuple_exec_rtl<sizeof...(Fs)-1>::exec(fs, std::forward<Arg>(arg),
+        std::forward<Args>(args)...)
     )
 };
 
@@ -221,7 +229,8 @@ composed<F, Fs...> compose(F f, Fs... fs)
  *     std::copy(v2.begin(), v2.end(), os);
  *     // prints: "0, 1, 1, 2, 3, 5, 8, 13, Hello, World, "
  */
-template <class T = void, class CharT = char, class Traits = std::char_traits<CharT> >
+template <class T = void, class CharT = char,
+          class Traits = std::char_traits<CharT> >
 class ostreamer
     : public std::iterator<std::output_iterator_tag, void, void, void, void>
 {
@@ -314,6 +323,8 @@ ALNR_BINARY_FUNCTOR(hypot);
 
 #undef RETURNS_AS_IS
 #undef RETURNS_DECAY
+
+} /* namespace alnr */
 
 #endif
 
