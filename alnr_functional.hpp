@@ -6,7 +6,6 @@
 #define F487DC3045F53649BE3584DDC8D06608771D375A9D2F7DDDE877FC02D20CCA92
 
 #include <cstddef>
-#include <cmath>
 #include <tuple>
 #include <utility>
 
